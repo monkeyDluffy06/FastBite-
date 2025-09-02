@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastBite - Menu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .main-bg {
+            background-color: #0c0a09;
+            background-image: 
+                radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px),
+                radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 30px),
+                radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 40px),
+                radial-gradient(rgba(255,255,255,.4), rgba(255,255,255,.1) 2px, transparent 30px);
+            background-size: 550px 550px, 350px 350px, 250px 250px, 150px 150px;
+            background-position: 0 0, 40px 60px, 130px 270px, 70px 100px;
+        }
+    </style>
+</head>
+<body class="main-bg text-white">
+
+    <!-- Header -->
+    <header class="bg-gray-900/50 backdrop-blur-sm sticky top-0 z-10 border-b border-gray-700">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <a href="./home.html" class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-violet-600">FastBite</a>
+                </div>
+                <div class="flex items-center">
+                    <button id="logoutButton" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg">Logout</button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="text-center mb-8">
+            <h1 id="canteenName" class="text-3xl sm:text-4xl font-bold tracking-tight">Canteen Menu</h1>
+            <p class="text-gray-400 mt-2">Select items to add to your cart</p>
+        </div>
+        <div id="menuItems" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Menu items will be dynamically inserted here by JavaScript -->
+        </div>
+    </main>
+
+    <!-- Floating Cart Button -->
+    <div class="fixed bottom-8 right-8">
+        <button id="viewCartButton" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-4 px-6 rounded-full shadow-lg shadow-violet-500/30 transition-transform transform hover:scale-110 duration-300 flex items-center">
+            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+            <span id="cartCount">Cart (0)</span>
+        </button>
+    </div>
+
+    <script>
+        // --- PAGE GUARD & LOGOUT ---
+        document.addEventListener('DOMContentLoaded', () => { if (!localStorage.getItem('fastBiteUser')) { window.location.href = './index.html'; } });
+        const logoutButton = document.getElementById('logoutButton');
+        if (logoutButton) { logoutButton.addEventListener('click', () => { localStorage.removeItem('fastBiteUser'); alert('You have been logged out.'); window.location.href = './index.html'; }); }
+        
+        // --- COMPLETE MENU DATA ---
+        // This is the placeholder for all menu items. You can edit this section.
+        const menuData = {
+            // --- START: Safal Bistro MENU (REPLACE WITH REAL DATA) ---
+            'Safal-Bistro': [
+                { id: 101, name: 'Tea', price: 20, desc: 'A crisp, sweet fruit.', image: 'https://placehold.co/400x300/2d2d2d/ffffff?text=Apple' },
+                { id: 102, name: 'Banana', price: 10, desc: 'A soft, potassium-rich fruit.', image: 'https://placehold.co/400x300/2d2d2d/ffffff?text=Banana' },
+                { id: 103, name: 'Orange', price: 25, desc: 'A juicy, citrus fruit.', image: 'https://placehold.co/400x300/2d2d2d/ffffff?text=Orange' },
+                { id: 104, name: 'Grapes', price: 40, desc: 'A bunch of sweet grapes.', image: 'https://placehold.co/400x300/2d2d2d/ffffff?text=Grapes' },
+                { id: 105, name: 'Pineapple', price: 60, desc: 'A tropical fruit with a tangy taste.', image: 'https://placehold.co/400x300/2d2d2d/ffffff?text=Pineapple' },
+                { id: 106, name: 'Mango', price: 50, desc: 'The king of fruits.', image: 'https://placehold.co/400x300/2d2d2d/ffffff?text=Mango' },
+                { id: 107, name: 'Strawberry', price: 70, desc: 'A sweet, red fruit.', image: 'https://placehold.co/400x300/2d2d2d/ffffff?text=Strawberry' },
+                { id: 108, name: 'Pomegranate', price: 80, desc: 'Full of juicy seeds.', image: 'https://placehold.co/400x300/2d2d2d/ffffff?text=Pomegranate' },
+                { id: 109, name: 'Kiwi', price: 30, desc: 'A green fruit with a unique flavor.', image: 'https://placehold.co/400x300/2d2d2d/ffffff?text=Kiwi' },
+                { id: 110, name: 'Watermelon', price: 40, desc: 'A refreshing summer fruit.', image: 'https://placehold.co/400x300/2d2d2d/ffffff?text=Watermelon' }
+            ],
+            // --- END: MAYURI CANTEEN MENU ---
+
+            // --- START: AB DAKSHIN MENU (REPLACE WITH REAL DATA) ---
+            'Ab-Dakshin': [
+                { id: 201, name: 'Cherry', price: 90, desc: 'A small, sweet red fruit.', image: 'https://placehold.co/400x300/3d3d3d/ffffff?text=Cherry' },
+                { id: 202, name: 'Peach', price: 60, desc: 'A soft, fuzzy fruit.', image: 'https://placehold.co/400x300/3d3d3d/ffffff?text=Peach' },
+                { id: 203, name: 'Plum', price: 50, desc: 'A sweet and juicy fruit.', image: 'https://placehold.co/400x300/3d3d3d/ffffff?text=Plum' },
+                { id: 204, name: 'Pear', price: 40, desc: 'A mild and sweet fruit.', image: 'https://placehold.co/400x300/3d3d3d/ffffff?text=Pear' },
+                { id: 205, name: 'Blueberry', price: 120, desc: 'Small, sweet berries.', image: 'https://placehold.co/400x300/3d3d3d/ffffff?text=Blueberry' },
+                { id: 206, name: 'Raspberry', price: 150, desc: 'A tart and sweet berry.', image: 'https://placehold.co/400x300/3d3d3d/ffffff?text=Raspberry' },
+                { id: 207, name: 'Fig', price: 100, desc: 'A unique and sweet fruit.', image: 'https://placehold.co/400x300/3d3d3d/ffffff?text=Fig' },
+                { id: 208, name: 'Guava', price: 30, desc: 'A tropical fruit with a fragrant aroma.', image: 'https://placehold.co/400x300/3d3d3d/ffffff?text=Guava' },
+                { id: 209, name: 'Papaya', price: 45, desc: 'A sweet, tropical fruit.', image: 'https://placehold.co/400x300/3d3d3d/ffffff?text=Papaya' },
+                { id: 210, name: 'Lychee', price: 110, desc: 'A small, sweet, and floral fruit.', image: 'https://placehold.co/400x300/3d3d3d/ffffff?text=Lychee' }
+            ],
+            // --- END: AB DAKSHIN MENU ---
+
+            // --- START: NIGHT MESS MENU (REPLACE WITH REAL DATA) ---
+            'Night-Mess': [
+                { id: 301, name: 'Naan', price: 80, desc: 'An exotic and mildly sweet fruit.', image: 'https://placehold.co/400x300/4d4d4d/ffffff?text=Dragon+Fruit' },
+                { id: 302, name: 'Passion Fruit', price: 180, desc: 'A tart and aromatic fruit.', image: 'https://placehold.co/400x300/4d4d4d/ffffff?text=Passion+Fruit' },
+                { id: 303, name: 'Apricot', price: 90, desc: 'A small, sweet, and orange-colored fruit.', image: 'https://placehold.co/400x300/4d4d4d/ffffff?text=Apricot' },
+                { id: 304, name: 'Blackberry', price: 160, desc: 'A sweet and slightly tart berry.', image: 'https://placehold.co/400x300/4d4d4d/ffffff?text=Blackberry' },
+                { id: 305, name: 'Cantaloupe', price: 70, desc: 'A sweet and juicy melon.', image: 'https://placehold.co/400x300/4d4d4d/ffffff?text=Cantaloupe' },
+                { id: 306, name: 'Honeydew', price: 80, desc: 'A sweet melon with a light green flesh.', image: 'https://placehold.co/400x300/4d4d4d/ffffff?text=Honeydew' },
+                { id: 307, name: 'Nectarine', price: 75, desc: 'A smooth-skinned variety of peach.', image: 'https://placehold.co/400x300/4d4d4d/ffffff?text=Nectarine' },
+                { id: 308, name: 'Coconut', price: 50, desc: 'A tropical fruit with a hard shell.', image: 'https://placehold.co/400x300/4d4d4d/ffffff?text=Coconut' },
+                { id: 309, name: 'Lime', price: 5, desc: 'A sour citrus fruit.', image: 'https://placehold.co/400x300/4d4d4d/ffffff?text=Lime' },
+                { id: 310, 'name': 'Lemon', price: 7, desc: 'A sour yellow citrus fruit.', image: 'https://placehold.co/400x300/4d4d4d/ffffff?text=Lemon' }
+            ]
+            // --- END: NIGHT MESS MENU ---
+        };
+
+        // --- DYNAMIC PAGE LOGIC ---
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const canteenId = urlParams.get('canteen');
+            const canteenName = canteenId ? canteenId.replace(/-/g, ' ') : 'Unknown Canteen';
+            
+            document.getElementById('canteenName').textContent = `${canteenName} Menu`;
+            
+            const menuItems = menuData[canteenId] || [];
+            const menuContainer = document.getElementById('menuItems');
+            menuContainer.innerHTML = ''; // Clear previous items just in case
+            
+            if (menuItems.length > 0) {
+                menuItems.forEach(item => {
+                    const itemCard = `
+                        <div class="bg-gray-900/50 backdrop-blur-sm border border-gray-700 rounded-2xl overflow-hidden shadow-lg transition-transform transform hover:-translate-y-1 flex flex-col">
+                            <img class="w-full h-48 object-cover" src="${item.image}" alt="${item.name}" onerror="this.src='https://placehold.co/400x300/2d2d2d/ffffff?text=Image+Not+Found'">
+                            <div class="p-4 flex-grow">
+                                <h3 class="font-bold text-xl mb-2 text-gray-100">${item.name}</h3>
+                                <p class="text-gray-400 text-base">${item.desc}</p>
+                            </div>
+                            <div class="px-4 pt-2 pb-4 flex justify-between items-center">
+                                <span class="inline-block bg-gray-800 rounded-full px-3 py-1 text-sm font-semibold text-purple-300">₹${item.price}</span>
+                                <button onclick="addToCart(${item.id}, '${item.name}', ${item.price})" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">Add to Cart</button>
+                            </div>
+                        </div>
+                    `;
+                    menuContainer.innerHTML += itemCard;
+                });
+            } else {
+                menuContainer.innerHTML = '<p class="text-gray-400 col-span-full text-center">Sorry, the menu for this canteen is not available right now.</p>';
+            }
+        };
+        
+        // --- CART FUNCTIONALITY (PROTOTYPE) ---
+        let cart = [];
+        const cartCountSpan = document.getElementById('cartCount');
+
+        function addToCart(itemId, itemName, itemPrice) {
+            const item = { id: itemId, name: itemName, price: itemPrice };
+            cart.push(item);
+            updateCartCount();
+            console.log(`Item added to cart. Current cart:`, cart);
+            alert(`Added ${itemName} to cart!`);
+        }
+        
+        function updateCartCount() {
+            cartCountSpan.textContent = `Cart (${cart.length})`;
+        }
+    </script>
+</body>
+</html>

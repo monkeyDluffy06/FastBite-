@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastBite - Menu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .main-bg {
+            background-color: #0c0a09;
+            background-image: 
+                radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px),
+                radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 30px),
+                radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 40px),
+                radial-gradient(rgba(255,255,255,.4), rgba(255,255,255,.1) 2px, transparent 30px);
+            background-size: 550px 550px, 350px 350px, 250px 250px, 150px 150px;
+            background-position: 0 0, 40px 60px, 130px 270px, 70px 100px;
+        }
+    </style>
+</head>
+<body class="main-bg text-white">
+
+    <!-- Header -->
+    <header class="bg-gray-900/50 backdrop-blur-sm sticky top-0 z-20 border-b border-gray-700">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <a href="./home.html" class="text-gray-300 hover:text-white transition-colors duration-300">&larr; Back to Canteens</a>
+                <button id="logoutButton" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg">
+                    Logout
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="text-center mb-8">
+            <h1 id="canteenName" class="text-3xl sm:text-4xl font-bold tracking-tight">Menu</h1>
+            <p class="text-gray-400 mt-2">Select items to add to your cart</p>
+        </div>
+
+        <!-- Menu Items Grid -->
+        <div id="menuGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Menu items will be dynamically inserted here by JavaScript -->
+        </div>
+    </main>
+
+    <!-- Floating "View Cart" Button -->
+    <div id="viewCartButtonContainer" class="fixed bottom-6 right-6 z-30">
+        <button id="viewCartBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-full shadow-lg flex items-center space-x-2 transition-transform transform hover:scale-105 duration-300">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+            <span>View Cart</span>
+            <span id="cartItemCount" class="bg-red-500 text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">0</span>
+        </button>
+    </div>
+
+    <!-- Cart Modal -->
+    <div id="cartModal" class="fixed inset-0 bg-black bg-opacity-75 z-40 hidden flex items-center justify-center">
+        <div class="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg mx-4 border border-gray-700 flex flex-col" style="max-height: 90vh;">
+            <!-- Modal Header -->
+            <div class="flex justify-between items-center p-6 border-b border-gray-600">
+                <h2 class="text-2xl font-bold">Your Cart</h2>
+                <button id="closeCartBtn" class="text-gray-400 hover:text-white">&times;</button>
+            </div>
+            <!-- Modal Body -->
+            <div id="cartItemsContainer" class="p-6 overflow-y-auto">
+                <!-- Cart items will be dynamically inserted here -->
+            </div>
+            <!-- Modal Footer -->
+            <div class="p-6 border-t border-gray-600 mt-auto">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-lg font-medium text-gray-300">Total:</span>
+                    <span id="cartTotal" class="text-2xl font-bold text-purple-400">₹0.00</span>
+                </div>
+                <button id="checkoutBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition-transform transform hover:scale-105 duration-300">
+                    Proceed to Pay
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // --- PAGE GUARD ---
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!localStorage.getItem('fastBiteUser')) {
+                window.location.href = './index.html';
+            }
+        });
+
+        // --- LOGOUT FUNCTIONALITY ---
+        const logoutButton = document.getElementById('logoutButton');
+        logoutButton.addEventListener('click', () => {
+            localStorage.removeItem('fastBiteUser');
+            localStorage.removeItem('fastBiteCart'); // Also clear cart on logout
+            alert('You have been logged out.');
+            window.location.href = './index.html';
+        });
+
+        // --- MENU DATA ---
+        // Simplified to only include the menu for Ab Dakshin for focused development
+        const menuData = {
+            'Ab-Dakshin': [
+                { id: 201, name: 'Chicken Biriyani', price: 210, desc: 'Spicy flavour full chicken biriyani.', image: './Images/C-Biriyani.jpg' },
+                { id: 202, name: 'Veg Biriyani', price: 100, desc: 'Flavour full Veg Biriyani .', image: './Images/V-Biriyani.jpg' },
+                { id: 203, name: 'Chicken Schezwan Fried Rice', price: 170, desc: 'Fried Rice with chewy Chicken Bits', image: './Images/Fried-Rice-2.jpg' },
+                { id: 204, name: 'Veg Schezwan Fried Rice', price: 140, desc: 'Fried rice with freshly chopped carrots and spring onions', image: './Images/Fried-Rice-1.jpg' },
+                { id: 205, name: 'Plain Dosa', price: 110, desc: 'crispy Dosa with tangy sambar and chutney', image: './Images/Dosa.jpeg' },
+                { id: 206, name: 'Masala Dosa', price: 130, desc: 'Extra crispy dosa with potato stuffing.', image: './Images/M-Dosa.jpeg' },
+                { id: 207, name: 'Chilly Chiken', price: 180, desc: 'juicy and tender chiken with galze of special chilli sauce', image: './Images/chilli-chicken.jpeg' },
+                { id: 208, name: 'Panner Butter Masala', price: 200, desc: 'soft cottage cheese in buttery gravy.', image: './Images/Panner-B-M.jpeg' },
+                { id: 209, name: 'Butter Chicken', price: 250, desc: 'Tender Boneless chicken in buttery gravy', image: './Images/Chicken-B-M.jpeg' },
+                { id: 210, name: 'Chicken Kothu Parotta', price: 160, desc: 'Flacky Parotta with spicy chicken curry.', image: './Images/Kothu-parotta.jpeg' },
+                { id: 211, name: 'Butter Naan', price: 40, desc: 'Flacky Indian Bread.', image: './Images/Naan.jpeg' }
+            ]
+        };
+
+        // --- DYNAMIC PAGE LOGIC ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const canteenKey = urlParams.get('canteen');
+            // Default to 'Ab-Dakshin' if no key is provided, for simplicity
+            const finalCanteenKey = canteenKey || 'Ab-Dakshin';
+            const canteenName = finalCanteenKey.replace('-', ' ');
+
+            document.getElementById('canteenName').textContent = `${canteenName} Menu`;
+            const menuItems = menuData[finalCanteenKey] || [];
+            const menuGrid = document.getElementById('menuGrid');
+
+            if (menuItems.length === 0) {
+                menuGrid.innerHTML = `<p class="text-gray-400 col-span-full text-center">Menu not available.</p>`;
+                return;
+            }
+
+            menuItems.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-gray-900/50 backdrop-blur-sm border border-gray-700 rounded-2xl overflow-hidden shadow-lg flex flex-col";
+                card.innerHTML = `
+                    <img src="${item.image}" alt="${item.name}" class="w-full h-40 object-cover">
+                    <div class="p-4 flex flex-col flex-grow">
+                        <h3 class="text-lg font-bold text-white">${item.name}</h3>
+                        <p class="text-gray-400 text-sm mt-1 flex-grow">${item.desc}</p>
+                        <div class="flex justify-between items-center mt-4">
+                            <span class="text-xl font-semibold text-purple-400">₹${item.price.toFixed(2)}</span>
+                            <button class="add-to-cart-btn bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-transform transform hover:scale-105" data-item-id="${item.id}" data-canteen-key="${finalCanteenKey}">
+                                Add
+                            </button>
+                        </div>
+                    </div>
+                `;
+                menuGrid.appendChild(card);
+            });
+        });
+
+        // --- CART LOGIC ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuGrid = document.getElementById('menuGrid');
+            const cartModal = document.getElementById('cartModal');
+            const viewCartBtn = document.getElementById('viewCartBtn');
+            const closeCartBtn = document.getElementById('closeCartBtn');
+            const cartItemsContainer = document.getElementById('cartItemsContainer');
+            const cartItemCount = document.getElementById('cartItemCount');
+            const cartTotal = document.getElementById('cartTotal');
+            const checkoutBtn = document.getElementById('checkoutBtn');
+
+            const getCart = () => JSON.parse(localStorage.getItem('fastBiteCart')) || [];
+            const saveCart = (cart) => {
+                localStorage.setItem('fastBiteCart', JSON.stringify(cart));
+                updateCartUI();
+            };
+            
+            const updateCartUI = () => {
+                const cart = getCart();
+                const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+                cartItemCount.textContent = totalItems;
+                
+                cartItemsContainer.innerHTML = '';
+                if (cart.length === 0) {
+                    cartItemsContainer.innerHTML = `<p class="text-gray-400 text-center">Your cart is empty.</p>`;
+                    checkoutBtn.disabled = true;
+                    checkoutBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                } else {
+                    let currentTotal = 0;
+                    cart.forEach(cartItem => {
+                        const itemDiv = document.createElement('div');
+                        itemDiv.className = 'flex items-center justify-between py-3 border-b border-gray-700';
+                        itemDiv.innerHTML = `
+                            <div>
+                                <h4 class="font-semibold">${cartItem.name}</h4>
+                                <p class="text-sm text-gray-400">₹${cartItem.price.toFixed(2)}</p>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <button class="quantity-change text-lg" data-item-id="${cartItem.id}" data-change="-1">&minus;</button>
+                                <span class="font-bold text-lg">${cartItem.quantity}</span>
+                                <button class="quantity-change text-lg" data-item-id="${cartItem.id}" data-change="1">&plus;</button>
+                            </div>
+                        `;
+                        cartItemsContainer.appendChild(itemDiv);
+                        currentTotal += cartItem.price * cartItem.quantity;
+                    });
+                    cartTotal.textContent = `₹${currentTotal.toFixed(2)}`;
+                    checkoutBtn.disabled = false;
+                    checkoutBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            };
+            
+            menuGrid.addEventListener('click', (e) => {
+                if (e.target.classList.contains('add-to-cart-btn')) {
+                    const button = e.target;
+                    const itemId = parseInt(button.dataset.itemId);
+                    const canteenKey = button.dataset.canteenKey;
+                    const menuItem = menuData[canteenKey].find(item => item.id === itemId);
+                    
+                    let cart = getCart();
+                    
+                    const existingItem = cart.find(item => item.id === itemId);
+                    if (existingItem) {
+                        existingItem.quantity++;
+                    } else {
+                        cart.push({ ...menuItem, quantity: 1, canteenKey: canteenKey });
+                    }
+                    saveCart(cart);
+                    
+                    button.textContent = 'Added!';
+                    setTimeout(() => { button.textContent = 'Add'; }, 1000);
+                }
+            });
+
+            cartItemsContainer.addEventListener('click', e => {
+                if (e.target.classList.contains('quantity-change')) {
+                    const button = e.target;
+                    const itemId = parseInt(button.dataset.itemId);
+                    const change = parseInt(button.dataset.change);
+                    let cart = getCart();
+                    const itemIndex = cart.findIndex(item => item.id === itemId);
+
+                    if (itemIndex > -1) {
+                        cart[itemIndex].quantity += change;
+                        if (cart[itemIndex].quantity <= 0) {
+                            cart.splice(itemIndex, 1);
+                        }
+                    }
+                    saveCart(cart);
+                }
+            });
+
+            viewCartBtn.addEventListener('click', () => {
+                updateCartUI();
+                cartModal.classList.remove('hidden');
+            });
+            closeCartBtn.addEventListener('click', () => {
+                cartModal.classList.add('hidden');
+            });
+            
+            checkoutBtn.addEventListener('click', () => {
+                const cart = getCart();
+                if (cart.length > 0) {
+                    alert(`Order Placed!\nTotal: ${cartTotal.textContent}\nThank you for using FastBite!`);
+                    localStorage.removeItem('fastBiteCart');
+                    updateCartUI();
+                    cartModal.classList.add('hidden');
+                }
+            });
+
+            updateCartUI();
+        });
+    </script>
+</body>
+</html>
+
+

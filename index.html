@@ -7,9 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
+        body { font-family: 'Inter', sans-serif; }
         .main-bg {
             background-color: #0c0a09;
             background-image: 
@@ -77,51 +75,51 @@
              <!-- Status Message -->
             <div id="statusMessage" class="mt-4 text-center"></div>
         </div>
-        
     </div>
 
     <script>
+        // --- THIS SCRIPT IS UPDATED TO CONNECT TO THE PYTHON SERVER ---
         const loginForm = document.getElementById('loginForm');
         const statusMessage = document.getElementById('statusMessage');
 
-        loginForm.addEventListener('submit', function(event) {
-            event.preventDefault(); 
+        loginForm.addEventListener('submit', async function(event) {
+            event.preventDefault(); // Stop the page from reloading
 
-            const regNumberInput = document.getElementById('regNumber');
-            const regNumber = regNumberInput.value.toUpperCase();
+            const regNumber = document.getElementById('regNumber').value.toUpperCase();
             const password = document.getElementById('password').value;
-            
-            const regNumberPattern = /^\d{2}[A-Z]{3}\d{5}$/;
 
+            // Basic validation
             if (!regNumber || !password) {
                 return showMessage('Please fill in all fields.', 'text-yellow-400');
             }
-            if (!regNumberPattern.test(regNumber)) {
-                return showMessage('Please enter a valid Registration Number (e.g., 24MIP10072).', 'text-red-400');
-            }
-            
-            // --- PROTOTYPE AUTHENTICATION ---
-            // This section is for the prototype only. It checks for user data in the browser's
-            // local storage. In the final version, this will be replaced with an API call
-            // to your Node.js backend to verify credentials against a real database.
-            const storedUser = localStorage.getItem('fastBiteUser');
-            if (!storedUser) {
-                return showMessage('No account found. Please sign up.', 'text-red-400');
-            }
 
-            const userData = JSON.parse(storedUser);
+            showMessage('Logging in...', 'text-blue-400');
+            try {
+                // Send the login data to the /api/login endpoint on the server
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ regNumber, password })
+                });
 
-            if (userData.regNumber === regNumber && userData.password === password) {
-                showMessage('Login successful! Redirecting...', 'text-green-400');
-                
-                // Redirect to the home page after a short delay
-                setTimeout(() => {
-                    // **URL FIX:** This now correctly points to the home page in the same folder.
-                    window.location.href = './home.html';
-                }, 1500);
+                const result = await response.json();
 
-            } else {
-                showMessage('Invalid registration number or password.', 'text-red-400');
+                if (response.ok) {
+                    // If login is successful, the server sends back a token.
+                    // We save this token to prove the user is logged in.
+                    localStorage.setItem('fastBiteToken', result.token);
+                    
+                    showMessage('Login successful! Redirecting...', 'text-green-400');
+                    setTimeout(() => {
+                        window.location.href = './home.html';
+                    }, 1500);
+                } else {
+                    // Show the error message from the server (e.g., "Invalid credentials")
+                    showMessage(result.error || 'Invalid credentials.', 'text-red-400');
+                }
+            } catch (error) {
+                // This catches network errors, e.g., if the server is not running
+                showMessage('Could not connect to the server.', 'text-red-400');
             }
         });
 
@@ -132,4 +130,3 @@
     </script>
 </body>
 </html>
-

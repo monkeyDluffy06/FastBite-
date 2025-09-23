@@ -39,39 +39,35 @@
             <div class="bg-gray-900/50 backdrop-blur-sm border border-gray-700 rounded-2xl p-8 shadow-2xl shadow-purple-500/10">
                 <h2 class="text-2xl font-semibold text-center text-gray-200 mb-6">Create an Account</h2>
                 
-                <form id="signupForm" novalidate>
-                    <!-- Registration Number -->
+                <form id="signupForm">
+                    <!-- Registration Number Input -->
                     <div class="mb-4">
                         <label for="regNumber" class="block text-sm font-medium text-gray-400 mb-2">Registration Number</label>
-                        <input type="text" id="regNumber" required class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none" placeholder="e.g., 24MIP10072">
+                        <input type="text" id="regNumber" name="regNumber" required
+                               class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none transition duration-200"
+                               placeholder="e.g., 24MIP10072">
                     </div>
 
-                    <!-- College Email -->
+                    <!-- Password Input -->
                     <div class="mb-4">
-                        <label for="collegeEmail" class="block text-sm font-medium text-gray-400 mb-2">College Email</label>
-                        <input type="email" id="collegeEmail" required class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none" placeholder="your.name@vitbhopal.ac.in">
+                        <label for="password" class="block text-sm font-medium text-gray-400 mb-2">Create a Password</label>
+                        <input type="password" id="password" name="password" required
+                               class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none transition duration-200"
+                               placeholder="•••••••• (at least 6 characters)">
                     </div>
-
-                    <!-- Mobile Number -->
-                    <div class="mb-4">
-                        <label for="mobileNumber" class="block text-sm font-medium text-gray-400 mb-2">Mobile Number</label>
-                        <input type="tel" id="mobileNumber" required class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none" placeholder="10-digit number">
-                    </div>
-
-                    <!-- Password -->
-                    <div class="mb-4">
-                        <label for="password" class="block text-sm font-medium text-gray-400 mb-2">Set Password</label>
-                        <input type="password" id="password" required class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none" placeholder="••••••••">
-                    </div>
-
-                    <!-- Confirm Password -->
+                    
+                    <!-- NEW: Confirm Password Input -->
                     <div class="mb-6">
                         <label for="confirmPassword" class="block text-sm font-medium text-gray-400 mb-2">Confirm Password</label>
-                        <input type="password" id="confirmPassword" required class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none" placeholder="••••••••">
+                        <input type="password" id="confirmPassword" name="confirmPassword" required
+                               class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none transition duration-200"
+                               placeholder="••••••••">
                     </div>
 
+
                     <!-- Sign Up Button -->
-                    <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-purple-500 transition-transform transform hover:scale-105 duration-300">
+                    <button type="submit"
+                            class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-purple-500 transition-transform transform hover:scale-105 duration-300">
                         Sign Up
                     </button>
 
@@ -85,66 +81,49 @@
              <!-- Status Message -->
             <div id="statusMessage" class="mt-4 text-center"></div>
         </div>
-        
     </div>
 
     <script>
         const signupForm = document.getElementById('signupForm');
         const statusMessage = document.getElementById('statusMessage');
 
-        signupForm.addEventListener('submit', function(event) {
+        signupForm.addEventListener('submit', async function(event) {
             event.preventDefault();
 
-            // --- Get Form Data ---
             const regNumber = document.getElementById('regNumber').value.toUpperCase();
-            const email = document.getElementById('collegeEmail').value;
-            const mobile = document.getElementById('mobileNumber').value;
             const password = document.getElementById('password').value;
+            // NEW: Get the value from the confirm password field
             const confirmPassword = document.getElementById('confirmPassword').value;
 
-            // --- Validation ---
-            const regNumberPattern = /^\d{2}[A-Z]{3}\d{5}$/;
-            if (!regNumberPattern.test(regNumber)) {
-                return showMessage('Invalid Registration Number format.', 'text-red-400');
-            }
-            if (!email.endsWith('@vitbhopal.ac.in')) {
-                return showMessage('Please use a valid VIT Bhopal email.', 'text-red-400');
-            }
-             if (!/^\d{10}$/.test(mobile)) {
-                return showMessage('Please enter a valid 10-digit mobile number.', 'text-red-400');
-            }
-            if (password.length < 6) {
-                return showMessage('Password must be at least 6 characters.', 'text-red-400');
-            }
+            // Simple frontend validation
+            if (!regNumber) return showMessage('Registration number is required.', 'text-red-400');
+            if (password.length < 6) return showMessage('Password must be at least 6 characters.', 'text-red-400');
+            
+            // NEW: Check if the passwords match
             if (password !== confirmPassword) {
                 return showMessage('Passwords do not match.', 'text-red-400');
             }
-
-            // --- DATA STORAGE (PROTOTYPE ONLY) ---
-            // This section uses the browser's localStorage for demonstration purposes.
-            // In a real application, this data MUST be sent to a secure backend server
-            // to be stored in a database. Storing sensitive data like passwords
-            // on the client-side is insecure.
+            
             showMessage('Creating account...', 'text-blue-400');
 
-            setTimeout(() => {
-                const userData = {
-                    regNumber: regNumber,
-                    email: email,
-                    mobile: mobile,
-                    password: password // In a real app, this would be hashed on the server.
-                };
-                localStorage.setItem('fastBiteUser', JSON.stringify(userData));
-                
-                showMessage('Account created successfully! Redirecting to login...', 'text-green-400');
-                console.log('New user signed up:', { regNumber, email, mobile });
-                
-                // Redirect to login page after a short delay
-                setTimeout(() => {
-                    window.location.href = './index.html';
-                }, 2000);
+            try {
+                // Send the simplified data to the backend server
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ regNumber, password })
+                });
+                const result = await response.json();
 
-            }, 1500);
+                if (response.ok) {
+                    showMessage('Account created! Redirecting to login...', 'text-green-400');
+                    setTimeout(() => { window.location.href = './index.html'; }, 2000);
+                } else {
+                    showMessage(result.error || 'Registration failed.', 'text-red-400');
+                }
+            } catch (error) {
+                showMessage('Could not connect to the server.', 'text-red-400');
+            }
         });
 
         function showMessage(message, colorClass) {

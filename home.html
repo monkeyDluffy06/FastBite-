@@ -4,15 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FastBite - Home</title>
-    <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Font 'Inter' for a clean look -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        /* This is the original background style from the login page */
+        body { font-family: 'Inter', sans-serif; }
         .main-bg {
             background-color: #0c0a09;
             background-image: 
@@ -25,81 +20,64 @@
         }
     </style>
 </head>
-<body class="main-bg text-white min-h-screen">
+<body class="main-bg text-white">
 
-    <!-- This main div is hidden by default until the script verifies the user is logged in -->
-    <div id="app" class="hidden">
-
-        <!-- Header Section -->
-        <header class="bg-gray-900/50 backdrop-blur-sm border-b border-gray-700 p-4 sticky top-0 z-10">
-            <div class="container mx-auto flex justify-between items-center">
-                <!-- App Title -->
-                <h1 class="text-2xl font-bold tracking-tight">
-                    <span class="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-violet-600">
-                        FastBite
-                    </span>
-                </h1>
-                <!-- Logout Button -->
-                <button id="logoutButton" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors">
-                    Logout
-                </button>
+    <div id="app" class="hidden min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="bg-gray-900/50 backdrop-blur-sm sticky top-0 z-10 border-b border-gray-700">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <div class="flex items-center space-x-3">
+                        <h1 class="text-xl font-bold text-white">FastBite</h1>
+                    </div>
+                    <button id="logoutButton" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg">
+                        Logout
+                    </button>
+                </div>
             </div>
         </header>
 
-        <!-- Main Content Area -->
-        <main class="container mx-auto p-4 md:p-8">
-            <h2 class="text-3xl font-bold text-gray-200 mb-6">Choose a Canteen</h2>
+        <!-- Main Content Area - Updated for Centering -->
+        <main class="flex-grow flex flex-col items-center justify-center p-4 md:p-8">
+            <h2 class="text-3xl font-bold text-gray-200 mb-8 text-center">Choose a Canteen</h2>
 
-            <!-- Grid container for the canteen cards -->
-            <div class="flex justify-center">
-                <!-- Canteen Card : AB dakshin  -->
+            <!-- Flex container to center the single card -->
+            <div class="w-full max-w-sm">
+                <!-- Canteen Card: AB Dakshin -->
                 <div class="bg-gray-900/50 backdrop-blur-sm border border-gray-700 rounded-2xl overflow-hidden shadow-lg hover:shadow-purple-500/20 transition-all duration-300 transform hover:-translate-y-1">
                     <img src="https://placehold.co/600x400/0c0a09/FFF?text=Ab+Dakshin" alt="Ab Dakshin" class="w-full h-48 object-cover">
                     <div class="p-6">
                         <h3 class="text-xl font-bold text-white mb-2">AB Dakshin</h3>
-                        <p class="text-gray-400 mb-4">South Indian, Indo-Chinese, desserts, jucies <span class="text-yellow-400">Mostly Crowded</span>.</p>
+                        <p class="text-gray-400 mb-4">South Indian, Indo-Chinese & More. <span class="text-yellow-400">Usually Crowded</span>.</p>
                         <a href="./menu.html?canteen=Ab-Dakshin" class="block w-full text-center bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg transition-transform transform hover:scale-105 duration-300">
                             Order Now
                         </a>
                     </div>
                 </div>
-
             </div>
         </main>
     </div>
 
     <script>
-        // This script runs after the HTML content has been loaded.
-        window.addEventListener('DOMContentLoaded', () => {
-            const appDiv = document.getElementById('app');
-            
-            // --- Page Protection ---
-            // Check if user data exists in the browser's local storage.
-            // This is how we know if the user is "logged in".
-            const loggedInUser = localStorage.getItem('fastBiteUser');
-
-            // If no user data is found, they are not logged in.
-            if (!loggedInUser) {
-                // **URL FIX:** Using './' specifies the file is in the current directory.
-                // This is a more reliable way to link between local pages.
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- PAGE GUARD ---
+            const token = localStorage.getItem('fastBiteToken');
+            if (!token) {
                 window.location.href = './index.html';
-                return; // Stop the script here to prevent the page from showing.
+                return;
             }
 
-            // If user data EXISTS, it means they are logged in.
-            // We can now reveal the main content of the page.
-            appDiv.classList.remove('hidden');
-
-            // --- Logout Logic ---
+            // --- LOGOUT FUNCTIONALITY ---
             const logoutButton = document.getElementById('logoutButton');
             logoutButton.addEventListener('click', () => {
-                // When the logout button is clicked, clear the user data from storage.
-                localStorage.removeItem('fastBiteUser');
-                console.log('User logged out. Storage cleared.');
-                
-                // Redirect the user back to the login page.
+                localStorage.removeItem('fastBiteToken');
+                localStorage.removeItem('fastBiteCart');
+                alert('You have been logged out.');
                 window.location.href = './index.html';
             });
+
+            // --- SHOW THE APP ---
+            document.getElementById('app').classList.remove('hidden');
         });
     </script>
 </body>

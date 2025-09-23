@@ -27,9 +27,9 @@
         <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <a href="./home.html" class="text-gray-300 hover:text-white transition-colors duration-300">&larr; Back to Canteens</a>
-                <button id="logoutButton" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg">
-                    Logout
-                </button>
+                <h1 class="text-2xl font-bold tracking-tight text-white">
+                    <span class="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-violet-600">FastBite</span>
+                </h1>
             </div>
         </nav>
     </header>
@@ -57,50 +57,65 @@
     </div>
 
     <!-- Cart Modal -->
-    <div id="cartModal" class="fixed inset-0 bg-black bg-opacity-75 z-40 hidden flex items-center justify-center">
-        <div class="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg mx-4 border border-gray-700 flex flex-col" style="max-height: 90vh;">
-            <!-- Modal Header -->
+    <div id="cartModal" class="fixed inset-0 bg-black bg-opacity-75 z-40 hidden flex items-center justify-center p-4">
+        <div class="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg mx-auto border border-gray-700 flex flex-col" style="max-height: 90vh;">
             <div class="flex justify-between items-center p-6 border-b border-gray-600">
                 <h2 class="text-2xl font-bold">Your Cart</h2>
-                <button id="closeCartBtn" class="text-gray-400 hover:text-white">&times;</button>
+                <button id="closeCartBtn" class="text-gray-400 hover:text-white text-3xl leading-none">&times;</button>
             </div>
-            <!-- Modal Body -->
             <div id="cartItemsContainer" class="p-6 overflow-y-auto">
                 <!-- Cart items will be dynamically inserted here -->
             </div>
-            <!-- Modal Footer -->
             <div class="p-6 border-t border-gray-600 mt-auto">
                 <div class="flex justify-between items-center mb-4">
                     <span class="text-lg font-medium text-gray-300">Total:</span>
                     <span id="cartTotal" class="text-2xl font-bold text-purple-400">₹0.00</span>
                 </div>
-                <button id="checkoutBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition-transform transform hover:scale-105 duration-300">
-                    Proceed to Pay
+                <button id="checkoutBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition-transform transform hover:scale-105 duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                    Place Order
                 </button>
+                 <div id="checkoutError" class="text-red-400 text-sm mt-2 text-center"></div>
             </div>
+        </div>
+    </div>
+    
+    <!-- NEW: Order Confirmation Modal -->
+    <div id="confirmationModal" class="fixed inset-0 bg-black bg-opacity-75 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md mx-auto border border-gray-700 text-center p-8">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-500 mb-4">
+                <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            </div>
+            <h2 class="text-2xl font-bold text-white mb-2">Order Placed!</h2>
+            <p class="text-gray-400 mb-4">Your order is being prepared. You can track its status soon.</p>
+            <div class="bg-gray-900 rounded-lg p-4 mb-6 text-left">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-gray-400">Order ID:</span>
+                    <span id="confOrderId" class="font-mono text-white"></span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-400">Estimated Wait:</span>
+                    <span id="confEstTime" class="font-bold text-purple-400"></span>
+                </div>
+            </div>
+            <button id="closeConfModalBtn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg transition-transform transform hover:scale-105 duration-300">
+                Place Another Order
+            </button>
         </div>
     </div>
 
 
     <script>
-        // --- PAGE GUARD ---
+        const API_URL = 'http://127.0.0.1:5000';
+
+        // --- PAGE GUARD & LOGOUT ---
         document.addEventListener('DOMContentLoaded', () => {
-            if (!localStorage.getItem('fastBiteUser')) {
+            const token = localStorage.getItem('fastBiteToken');
+            if (!token) {
                 window.location.href = './index.html';
             }
         });
-
-        // --- LOGOUT FUNCTIONALITY ---
-        const logoutButton = document.getElementById('logoutButton');
-        logoutButton.addEventListener('click', () => {
-            localStorage.removeItem('fastBiteUser');
-            localStorage.removeItem('fastBiteCart'); // Also clear cart on logout
-            alert('You have been logged out.');
-            window.location.href = './index.html';
-        });
-
+        
         // --- MENU DATA ---
-        // Simplified to only include the menu for Ab Dakshin for focused development
         const menuData = {
             'Ab-Dakshin': [
                 { id: 201, name: 'Chicken Biriyani', price: 210, desc: 'Spicy flavour full chicken biriyani.', image: './Images/C-Biriyani.jpg' },
@@ -120,13 +135,11 @@
         // --- DYNAMIC PAGE LOGIC ---
         document.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
-            const canteenKey = urlParams.get('canteen');
-            // Default to 'Ab-Dakshin' if no key is provided, for simplicity
-            const finalCanteenKey = canteenKey || 'Ab-Dakshin';
-            const canteenName = finalCanteenKey.replace('-', ' ');
+            const canteenKey = urlParams.get('canteen') || 'Ab-Dakshin';
+            const canteenName = canteenKey.replace('-', ' ');
 
             document.getElementById('canteenName').textContent = `${canteenName} Menu`;
-            const menuItems = menuData[finalCanteenKey] || [];
+            const menuItems = menuData[canteenKey] || [];
             const menuGrid = document.getElementById('menuGrid');
 
             if (menuItems.length === 0) {
@@ -144,7 +157,7 @@
                         <p class="text-gray-400 text-sm mt-1 flex-grow">${item.desc}</p>
                         <div class="flex justify-between items-center mt-4">
                             <span class="text-xl font-semibold text-purple-400">₹${item.price.toFixed(2)}</span>
-                            <button class="add-to-cart-btn bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-transform transform hover:scale-105" data-item-id="${item.id}" data-canteen-key="${finalCanteenKey}">
+                            <button class="add-to-cart-btn bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-transform transform hover:scale-105" data-item-id="${item.id}" data-canteen-key="${canteenKey}">
                                 Add
                             </button>
                         </div>
@@ -164,6 +177,13 @@
             const cartItemCount = document.getElementById('cartItemCount');
             const cartTotal = document.getElementById('cartTotal');
             const checkoutBtn = document.getElementById('checkoutBtn');
+            const checkoutError = document.getElementById('checkoutError');
+            
+            // --- NEW: Confirmation Modal Elements ---
+            const confirmationModal = document.getElementById('confirmationModal');
+            const closeConfModalBtn = document.getElementById('closeConfModalBtn');
+            const confOrderId = document.getElementById('confOrderId');
+            const confEstTime = document.getElementById('confEstTime');
 
             const getCart = () => JSON.parse(localStorage.getItem('fastBiteCart')) || [];
             const saveCart = (cart) => {
@@ -180,7 +200,6 @@
                 if (cart.length === 0) {
                     cartItemsContainer.innerHTML = `<p class="text-gray-400 text-center">Your cart is empty.</p>`;
                     checkoutBtn.disabled = true;
-                    checkoutBtn.classList.add('opacity-50', 'cursor-not-allowed');
                 } else {
                     let currentTotal = 0;
                     cart.forEach(cartItem => {
@@ -192,9 +211,9 @@
                                 <p class="text-sm text-gray-400">₹${cartItem.price.toFixed(2)}</p>
                             </div>
                             <div class="flex items-center space-x-3">
-                                <button class="quantity-change text-lg" data-item-id="${cartItem.id}" data-change="-1">&minus;</button>
+                                <button class="quantity-change text-lg font-bold" data-item-id="${cartItem.id}" data-change="-1">&minus;</button>
                                 <span class="font-bold text-lg">${cartItem.quantity}</span>
-                                <button class="quantity-change text-lg" data-item-id="${cartItem.id}" data-change="1">&plus;</button>
+                                <button class="quantity-change text-lg font-bold" data-item-id="${cartItem.id}" data-change="1">&plus;</button>
                             </div>
                         `;
                         cartItemsContainer.appendChild(itemDiv);
@@ -202,7 +221,6 @@
                     });
                     cartTotal.textContent = `₹${currentTotal.toFixed(2)}`;
                     checkoutBtn.disabled = false;
-                    checkoutBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                 }
             };
             
@@ -212,9 +230,7 @@
                     const itemId = parseInt(button.dataset.itemId);
                     const canteenKey = button.dataset.canteenKey;
                     const menuItem = menuData[canteenKey].find(item => item.id === itemId);
-                    
                     let cart = getCart();
-                    
                     const existingItem = cart.find(item => item.id === itemId);
                     if (existingItem) {
                         existingItem.quantity++;
@@ -222,7 +238,6 @@
                         cart.push({ ...menuItem, quantity: 1, canteenKey: canteenKey });
                     }
                     saveCart(cart);
-                    
                     button.textContent = 'Added!';
                     setTimeout(() => { button.textContent = 'Add'; }, 1000);
                 }
@@ -235,7 +250,6 @@
                     const change = parseInt(button.dataset.change);
                     let cart = getCart();
                     const itemIndex = cart.findIndex(item => item.id === itemId);
-
                     if (itemIndex > -1) {
                         cart[itemIndex].quantity += change;
                         if (cart[itemIndex].quantity <= 0) {
@@ -254,20 +268,54 @@
                 cartModal.classList.add('hidden');
             });
             
-            checkoutBtn.addEventListener('click', () => {
+            checkoutBtn.addEventListener('click', async () => {
                 const cart = getCart();
-                if (cart.length > 0) {
-                    alert(`Order Placed!\nTotal: ${cartTotal.textContent}\nThank you for using FastBite!`);
-                    localStorage.removeItem('fastBiteCart');
-                    updateCartUI();
+                const token = localStorage.getItem('fastBiteToken');
+                checkoutError.textContent = '';
+                if (cart.length === 0) return;
+
+                checkoutBtn.disabled = true;
+                checkoutBtn.textContent = 'Placing...';
+
+                try {
+                    const response = await fetch(`${API_URL}/api/order`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ items: cart })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Failed to place order.');
+                    }
+                    const result = await response.json();
+                    
+                    // --- NEW: Show confirmation modal instead of alert ---
                     cartModal.classList.add('hidden');
+                    confOrderId.textContent = result.orderId;
+                    confEstTime.textContent = result.estimatedPrepTime;
+                    confirmationModal.classList.remove('hidden');
+
+                } catch (error) {
+                    checkoutError.textContent = error.message;
+                } finally {
+                    checkoutBtn.disabled = false;
+                    checkoutBtn.textContent = 'Place Order';
                 }
             });
 
-            updateCartUI();
+            // --- NEW: Add event listener for the new modal's close button ---
+            closeConfModalBtn.addEventListener('click', () => {
+                confirmationModal.classList.add('hidden');
+                localStorage.removeItem('fastBiteCart'); // Clear cart
+                updateCartUI(); // Update UI to show empty cart
+            });
+
+            updateCartUI(); // Initial call to set up the cart UI on page load
         });
     </script>
 </body>
 </html>
-
-

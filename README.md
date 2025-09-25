@@ -1,7 +1,7 @@
 # 🍔 FastBite
 ![Python](https://img.shields.io/badge/Python-3.7%2B-blue) 
 ![Flask](https://img.shields.io/badge/Flask-1.1.2-orange) 
-![License](https://img.shields.io/badge/License-MIT-green)
+
 
 
 

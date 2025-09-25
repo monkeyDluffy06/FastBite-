@@ -75,7 +75,7 @@ source venv/bin/activate
 ```
 - Windows:
 ```bash
-.env\Scriptsctivate
+.\venv\Scripts\activate
 ```
 
 ---

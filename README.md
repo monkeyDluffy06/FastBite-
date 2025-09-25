@@ -2,10 +2,6 @@
 ![Python](https://img.shields.io/badge/Python-3.7%2B-blue) 
 ![Flask](https://img.shields.io/badge/Flask-1.1.2-orange) 
 ![License](https://img.shields.io/badge/License-MIT-green)
-![Frontend - Siddarth](https://img.shields.io/badge/Frontend-Siddarth-blueviolet?style=for-the-badge&logo=github)
-![Backend - Rishi](https://img.shields.io/badge/Backend-Rishi-green?style=for-the-badge&logo=github)
-![Data - Koushik](https://img.shields.io/badge/Data-Koushik-orange?style=for-the-badge&logo=github)
-![ML - Siddarth & Rishi](https://img.shields.io/badge/ML-Siddarth%20%26%20Rishi-red?style=for-the-badge&logo=python)
 
 
 

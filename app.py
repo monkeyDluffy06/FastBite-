@@ -149,6 +149,8 @@ def place_order(current_user):
     new_order = Order(user_id=current_user.id, items=str(item_list), estimated_time=estimated_time)
     db.session.add(new_order)
     db.session.commit()
+    # Simulate an order being completed to keep the queue realistic
+    if len(KITCHEN_QUEUE) > 0: KITCHEN_QUEUE.pop(0)
     KITCHEN_QUEUE.append(new_order.id)
 
     return jsonify({

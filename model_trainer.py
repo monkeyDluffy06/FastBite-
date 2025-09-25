@@ -48,12 +48,22 @@ for _ in range(NUM_ORDERS):
     is_peak = 1 if time_of_day in [12, 13, 14, 19, 20] else 0
     queue_length_at_order = max(0, current_queue_length + random.randint(-2, 2))
     
-    # Target Variable Calculation (The "secret sauce")
-    base_time = max_item_time + (avg_item_time * 0.5)
-    queue_impact = queue_length_at_order * 0.75
-    peak_hour_impact = 5 if is_peak else 0
-    random_noise = random.uniform(-2, 2)
-    final_prep_time = round(base_time + queue_impact + peak_hour_impact + random_noise)
+    
+    # Target Variable Calculation 
+
+    # 1. Calculate the core cooking time based on the most complex item.
+    base_time = max_item_time 
+
+    # 2. Add time for each additional item in the order.
+    complexity_impact = (num_items_in_order - 1) * (avg_item_time * 0.4) 
+
+    # 3. The queue and peak hours are still important, but less dominant.
+    queue_impact = queue_length_at_order * 0.5
+    peak_hour_impact = 7 if is_peak else 0
+    random_noise = random.uniform(-1, 1)
+
+    final_prep_time = round(base_time + complexity_impact + queue_impact + peak_hour_impact + random_noise)
+
     
     data.append([
         num_items_in_order, max_item_time, avg_item_time, 

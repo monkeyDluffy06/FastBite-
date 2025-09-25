@@ -53,7 +53,7 @@ python3 --version
 
 ### 2️⃣ Clone the Repository
 ```bash
-git clone https://github.com/monkeyDluffy06/FastBite-.git
+git clone https://github.com/monkeyDluffy06/FastBite_VIT.git
 cd FastBite-
 ```
 
